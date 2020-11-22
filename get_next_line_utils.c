@@ -6,7 +6,7 @@
 /*   By: besellem <besellem@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2020/11/19 00:17:16 by besellem          #+#    #+#             */
-/*   Updated: 2020/11/22 15:20:31 by besellem         ###   ########.fr       */
+/*   Updated: 2020/11/22 19:42:53 by besellem         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -46,8 +46,6 @@ char	*ft_substr(char const *s, unsigned int start, size_t len)
 	char	*str;
 	size_t	i;
 
-	if (!s)
-		return (NULL);
 	if (!(str = (char *)malloc(sizeof(char) * (len + 1))))
 		return (NULL);
 	i = 0;
