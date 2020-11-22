@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   get_next_line.h                                    :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: besellem <marvin@42.fr>                    +#+  +:+       +#+        */
+/*   By: besellem <besellem@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2020/11/04 21:37:46 by besellem          #+#    #+#             */
-/*   Updated: 2020/11/04 22:33:59 by besellem         ###   ########.fr       */
+/*   Created: 2020/11/19 00:14:58 by besellem          #+#    #+#             */
+/*   Updated: 2020/11/22 19:03:22 by besellem         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,26 +14,35 @@
 # define GET_NEXT_LINE_H
 
 /*
-** -- INCLUDES --
+** -- Includes --
 */
-#include <stdlib.h>
-#include <sys/types.h>
-#include <sys/uio.h>
-#include <unistd.h>
+# include <unistd.h>
+# include <stdlib.h>
 
 /*
-** -- PROTOTYPES --
-** List
+** -- Defines --
+** Limit on how many fds may be opened at the same time
 */
-typedef	struct	s_buffer
-{
-	char			*buf;
-	struct s_line	*next;
-}				t_buffer;
+# ifndef FD_LIMIT
+#  define FD_LIMIT 256
+# endif
+
+# ifndef BUFFER_SIZE
+#  define BUFFER_SIZE 4096
+# endif
 
 /*
-** Functions
+** -- Prototypes --
+** Utils
 */
-int				get_next_line(int fd, char **line);
+size_t	ft_strlen(const char *s);
+char	*ft_strdup(const char *s1);
+char	*ft_substr(char const *s, unsigned int start, size_t len);
+char	*ft_strchr(const char *s, int c);
+
+/*
+** get_next_line
+*/
+int		get_next_line(int fd, char **line);
 
 #endif

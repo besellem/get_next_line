@@ -3,128 +3,95 @@
 /*                                                        :::      ::::::::   */
 /*   get_next_line.c                                    :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: besellem <marvin@42.fr>                    +#+  +:+       +#+        */
+/*   By: besellem <besellem@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2020/11/04 21:37:27 by besellem          #+#    #+#             */
-/*   Updated: 2020/11/05 01:03:10 by besellem         ###   ########.fr       */
+/*   Created: 2020/11/19 00:14:36 by besellem          #+#    #+#             */
+/*   Updated: 2020/11/22 19:20:42 by besellem         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "get_next_line.h"
 
-#include <stdio.h>
-
-size_t	ft_strlen(const char *s)
-{
-	size_t i;
-
-	i = 0;
-	while (s[i])
-		++i;
-	return (i);
-}
-
-char	*ft_strncat(char *s1, const char *s2, size_t n)
-{
-	size_t len;
-	size_t i;
-
-	len = ft_strlen(s1);
-	i = 0;
-	while (s2[i] && i < n)
-	{
-		s1[len + i] = s2[i];
-		++i;
-	}
-	s1[len + i] = '\0';
-	return (s1);
-}
-
-int	find_eol(char *buf, int len, int *check)
-{
-	int i;
-
-	*check = 0;
-	if (!buf)
-		*check = -1;
-	i = 0;
-	while (buf[i])
-	{
-		if (buf[i] == '\n')
-		{
-			*check = 1;
-			break ;
-		}
-		++i;
-	}
-	if (i < len && !buf[i])
-		*check = -1;
-	printf("i => [%d], len => [%d], check => [%+d]\n", i, len, *check);
-	return (i);
-}
-
-void	add_to_buffer(char **ret, char *str, size_t len)
+static char	*ft_mcat(char *s1, char *s2)
 {
 	char	*new;
-	size_t	ret_size;
+	int		i;
+	int		j;
 
-	ret_size = *ret ? ft_strlen(*ret) : 0;
-	if (!(new = (char *)malloc(sizeof(char) * (ret_size + len + 1))))
-		return ;
-	*new = '\0';
-	if (*ret)
-		ft_strncat(new, *ret, ft_strlen(*ret));
-	ft_strncat(new, str, len);
-	if (*ret)
-		free(*ret);
-	*ret = new;
+	if (!(new = (char *)malloc(ft_strlen(s1) + ft_strlen(s2) + 1)))
+		return (NULL);
+	i = -1;
+	while (s1[++i])
+		new[i] = s1[i];
+	j = -1;
+	while (s2[++j])
+		new[i + j] = s2[j];
+	new[i + j] = '\0';
+	return (new);
 }
 
-int	get_next_line(int fd, char **line)
+static char	*ft_realloc_str(char *str, char **line, int *check)
 {
-	static int	i = 0;
-	char		buf[BUFFER_SIZE];
-	int			r;
-	int			check;
-	int			len;
+	char			*new;
+	unsigned int	i;
 
-	read(fd, buf, i);
-	printf("\n# STATIC I => [%d], FRST_BUF => [%s]\n\n", i, buf);
-	while ((r = read(fd, buf, BUFFER_SIZE)))
+	new = NULL;
+	if (str)
 	{
-		buf[r] = '\0';
-		len = find_eol(buf, r, &check);
-		printf("i => [%.3d], len => [%d], buf => [%s]\n", i, len, buf);
-		add_to_buffer(line, buf, len);
-		i += len + 1;
-		if (check == -1)
-			return (0);
-		else if (check == 1)
+		i = 0;
+		while (str[i] && str[i] != '\n')
+			++i;
+		if (str && str[i] == '\n')
+			new = ft_strdup(str + i + 1);
+		else if (str)
+			new = ft_strdup(str + i);
+		*line = ft_substr(str, 0, i);
+		free(str);
+		*check = 1;
+	}
+	return (new);
+}
+
+static char	*ft_read_line(int fd, char *str, char **line, int *check)
+{
+	char	buffer[BUFFER_SIZE + 1];
+	char	*tmp;
+	int		r;
+
+	while ((r = read(fd, buffer, BUFFER_SIZE)) > 0)
+	{
+		buffer[r] = '\0';
+		if (!str)
+			str = ft_strdup(buffer);
+		else
 		{
-			printf("# line: [%s]\n", *line);
-			return (1);
+			tmp = str;
+			str = ft_mcat(str, buffer);
+			free(tmp);
 		}
+		if (ft_strchr(str, '\n'))
+			return (ft_realloc_str(str, line, check));
 	}
-	return (-1);
+	if (str)
+		*check = 1;
+	*line = str ? ft_strdup(str) : "";
+	free(str);
+	return (NULL);
 }
 
-#include <fcntl.h>
-int	main(int ac, char **av)
+int			get_next_line(int fd, char **line)
 {
-	int		fd;
-	char	*ret;
+	static char	*strs[FD_LIMIT];
+	int			check;
 
-	if (ac != 2)
+	if (fd < 0 || fd >= FD_LIMIT || BUFFER_SIZE <= 0 || !line)
+		return (-1);
+	check = 0;
+	if (strs[fd] && ft_strchr(strs[fd], '\n'))
 	{
-		dprintf(2, "%s: argument error\n", av[0]);
-		return (1);
+		strs[fd] = ft_realloc_str(strs[fd], line, &check);
+		return (check);
 	}
-	if ((fd = open(av[1], O_RDWR)) == -1)
-		return (1);
-	while (get_next_line(fd, &ret) == 1)
-	{
-		printf("### ret: [%s]\n", ret);
-	}
-	close(fd);
-	return (0);
+	strs[fd] = ft_read_line(fd, strs[fd], line, &check);
+	return (check);
 }
