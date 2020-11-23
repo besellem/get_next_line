@@ -6,7 +6,7 @@
 /*   By: besellem <besellem@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2020/11/19 00:14:36 by besellem          #+#    #+#             */
-/*   Updated: 2020/11/23 00:07:26 by besellem         ###   ########.fr       */
+/*   Updated: 2020/11/23 11:59:05 by besellem         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -82,7 +82,8 @@ int			get_next_line(int fd, char **line)
 	static char	*strs[FD_LIMIT];
 	int			check;
 
-	if (read(fd, strs[fd], 0) || fd >= FD_LIMIT || BUFFER_SIZE <= 0 || !line)
+	if (fd < 0 || fd >= FD_LIMIT || read(fd, strs[fd], 0) ||
+		BUFFER_SIZE <= 0 || !line)
 		return (-1);
 	check = 0;
 	if (strs[fd] && ft_strchr(strs[fd], '\n'))
