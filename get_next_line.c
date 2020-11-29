@@ -6,7 +6,7 @@
 /*   By: besellem <besellem@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2020/11/19 00:14:36 by besellem          #+#    #+#             */
-/*   Updated: 2020/11/23 11:58:57 by besellem         ###   ########.fr       */
+/*   Updated: 2020/11/29 13:33:36 by besellem         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -41,14 +41,14 @@ static char	*ft_realloc_str(char *str, char **line, int *check)
 		i = 0;
 		while (str[i] && str[i] != '\n')
 			++i;
-		*line = ft_substr(str, 0, i);
-		if (str && str[i] == '\n')
+		if (str[i] == '\n')
 		{
-			new = ft_strdup(str + i + 1);
 			*check = 1;
+			new = ft_strdup(str + i + 1);
 		}
-		else if (str)
+		else if (str[i])
 			new = ft_strdup(str + i);
+		*line = ft_substr(str, 0, i);
 		free(str);
 	}
 	return (new);
@@ -63,14 +63,9 @@ static char	*ft_read_line(int fd, char *str, char **line, int *check)
 	while ((r = read(fd, buffer, BUFFER_SIZE)) > 0)
 	{
 		buffer[r] = '\0';
-		if (!str)
-			str = ft_strdup(buffer);
-		else
-		{
-			tmp = str;
-			str = ft_mcat(str, buffer);
-			free(tmp);
-		}
+		tmp = str;
+		str = ft_mcat(str, buffer);
+		free(tmp);
 		if (ft_strchr(str, '\n'))
 			break ;
 	}
@@ -91,8 +86,8 @@ int			get_next_line(int fd, char **line)
 		strs[fd] = ft_realloc_str(strs[fd], line, &check);
 		return (check);
 	}
-	if (!strs[fd])
-		strs[fd] = ft_strdup("");
+	if (!strs[fd] && !(strs[fd] = ft_strdup("")))
+		return (-1);
 	strs[fd] = ft_read_line(fd, strs[fd], line, &check);
 	return (check);
 }
