@@ -22,7 +22,7 @@ int	main(int ac, char **av)
 		dprintf(2, "%s: arg error\n", av[0]);
 		return (1);
 	}
-	if ((fd = open(av[1], O_RDONLY)) == 1)
+	if ((fd = open(av[1], O_RDONLY)) == -1)
 	{
 		dprintf(2, "%s: file error\n", av[0]);
 		return (1);
